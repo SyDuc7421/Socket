@@ -1,0 +1,34 @@
+import json
+import requests
+import pyodbc
+
+headers={"api_key":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MzgzNjY4OTUsImlhdCI6MTYzNzA3MDg5NSwic2NvcGUiOiJleGNoYW5nZV9yYXRlIiwicGVybWlzc2lvbiI6MH0.0GB2o6aCpphEpDtU7tIMnEhMFkGMF8CXdjF4IyH5bw0"}
+exchange_rate = requests.get("https://vapi.vnappmob.com/api/v2/exchange_rate/ctg",headers)
+data = exchange_rate.text
+data=json.loads(data)
+
+server='DESKTOP-LB9K023\SQLEXPRESS'
+#tên database
+database='DataCurrencyRate'
+conx=pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};\
+                    SERVER='+server+';\
+                    DATABASE=' +database+';\
+                    Trusted_Connection=yes;')
+
+cursor=conx.cursor()
+
+# data chứa một list các dictionaty
+data=data['results']
+print(data)
+valBuy=0
+valSell=0
+curName=[]
+
+for item in data:
+    valBuy=item['buy_transfer']
+    curName=item['currency']
+    valSell=item['sell']
+    print(str(valBuy)+" "+str(valSell))
+    cursor.execute("insert Data2111 values(?,?,?)",curName,valBuy,valSell)
+cursor.commit()
+conx.close()
